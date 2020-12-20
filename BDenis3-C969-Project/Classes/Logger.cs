@@ -16,8 +16,7 @@ namespace BDenis3_C969_Project
         // This class is intended to handle updates to the binary log file which contains the login history of the application
         // It wraps the file open / close logic and provides a method to write a new login record to the logfile.
         //
-        private static BinaryFormatter binaryWriter = new BinaryFormatter();
-        private static FileStream logFile;
+        private static StreamWriter logFile;
         private static string filename;
 
         public Logger(string logfilename)
@@ -29,9 +28,9 @@ namespace BDenis3_C969_Project
         {
             try
             {
-                logFile = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
-                LoginRecord rec = new LoginRecord(id, name);
-                binaryWriter.Serialize(logFile, rec);
+                logFile = new StreamWriter(filename, true);  // append to the file
+                string loginLine = $"User {name} with ID {id} logged in at {DateTime.UtcNow.ToString()}";
+                logFile.WriteLine(loginLine);
             }
             catch
             {
@@ -43,22 +42,4 @@ namespace BDenis3_C969_Project
             }
         }
     }
-
-    [Serializable]
-    public class LoginRecord
-    {
-        public int UserID { get; set; }
-        public string UserName { get; set; }
-        public string DateTimeStr { get; set; }
-        public string ZoneOffset { get; set; }
-
-        public LoginRecord( int id, string name)
-        {
-            UserID = id;
-            UserName = name;
-            DateTimeStr = DateTime.UtcNow.ToString();
-            ZoneOffset = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString();
-        }
-    }
-
 }

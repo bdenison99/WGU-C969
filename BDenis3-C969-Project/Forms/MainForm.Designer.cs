@@ -30,14 +30,17 @@
         {
             this.buttonAddCustomer = new System.Windows.Forms.Button();
             this.buttonEditCustomer = new System.Windows.Forms.Button();
-            this.monthCalendar1 = new System.Windows.Forms.MonthCalendar();
+            this.mainCalendar = new System.Windows.Forms.MonthCalendar();
             this.buttonDeleteCustomer = new System.Windows.Forms.Button();
-            this.radioDaily = new System.Windows.Forms.RadioButton();
+            this.radioMonthly = new System.Windows.Forms.RadioButton();
             this.radioWeekly = new System.Windows.Forms.RadioButton();
-            this.dgAppointments = new System.Windows.Forms.DataGridView();
             this.buttonAddAppointment = new System.Windows.Forms.Button();
             this.buttonEditAppointment = new System.Windows.Forms.Button();
             this.buttonCancelAppointment = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.buttonReports = new System.Windows.Forms.Button();
+            this.buttonExit = new System.Windows.Forms.Button();
+            this.dgAppointments = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dgAppointments)).BeginInit();
             this.SuspendLayout();
             // 
@@ -61,11 +64,14 @@
             this.buttonEditCustomer.UseVisualStyleBackColor = true;
             this.buttonEditCustomer.Click += new System.EventHandler(this.ButtonEditCustomer_Click);
             // 
-            // monthCalendar1
+            // mainCalendar
             // 
-            this.monthCalendar1.Location = new System.Drawing.Point(12, 185);
-            this.monthCalendar1.Name = "monthCalendar1";
-            this.monthCalendar1.TabIndex = 7;
+            this.mainCalendar.Location = new System.Drawing.Point(12, 185);
+            this.mainCalendar.MaxSelectionCount = 31;
+            this.mainCalendar.Name = "mainCalendar";
+            this.mainCalendar.TabIndex = 7;
+            this.mainCalendar.DateChanged += new System.Windows.Forms.DateRangeEventHandler(this.MainCalendar_DateSelected);
+            this.mainCalendar.DateSelected += new System.Windows.Forms.DateRangeEventHandler(this.MainCalendar_DateSelected);
             // 
             // buttonDeleteCustomer
             // 
@@ -77,22 +83,22 @@
             this.buttonDeleteCustomer.UseVisualStyleBackColor = true;
             this.buttonDeleteCustomer.Click += new System.EventHandler(this.ButtonDeleteCustomer_Click);
             // 
-            // radioDaily
+            // radioMonthly
             // 
-            this.radioDaily.AutoSize = true;
-            this.radioDaily.Location = new System.Drawing.Point(12, 359);
-            this.radioDaily.Name = "radioDaily";
-            this.radioDaily.Size = new System.Drawing.Size(78, 17);
-            this.radioDaily.TabIndex = 8;
-            this.radioDaily.TabStop = true;
-            this.radioDaily.Text = "Show Daily";
-            this.radioDaily.UseVisualStyleBackColor = true;
-            this.radioDaily.CheckedChanged += new System.EventHandler(this.RadioDaily_CheckedChanged);
+            this.radioMonthly.AutoSize = true;
+            this.radioMonthly.Location = new System.Drawing.Point(134, 356);
+            this.radioMonthly.Name = "radioMonthly";
+            this.radioMonthly.Size = new System.Drawing.Size(92, 17);
+            this.radioMonthly.TabIndex = 8;
+            this.radioMonthly.TabStop = true;
+            this.radioMonthly.Text = "Show Monthly";
+            this.radioMonthly.UseVisualStyleBackColor = true;
+            this.radioMonthly.CheckedChanged += new System.EventHandler(this.RadioMonthly_CheckedChanged);
             // 
             // radioWeekly
             // 
             this.radioWeekly.AutoSize = true;
-            this.radioWeekly.Location = new System.Drawing.Point(155, 359);
+            this.radioWeekly.Location = new System.Drawing.Point(12, 356);
             this.radioWeekly.Name = "radioWeekly";
             this.radioWeekly.Size = new System.Drawing.Size(84, 17);
             this.radioWeekly.TabIndex = 9;
@@ -100,14 +106,6 @@
             this.radioWeekly.Text = "Show Week";
             this.radioWeekly.UseVisualStyleBackColor = true;
             this.radioWeekly.CheckedChanged += new System.EventHandler(this.RadioWeekly_CheckedChanged);
-            // 
-            // dgAppointments
-            // 
-            this.dgAppointments.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgAppointments.Location = new System.Drawing.Point(262, 55);
-            this.dgAppointments.Name = "dgAppointments";
-            this.dgAppointments.Size = new System.Drawing.Size(526, 321);
-            this.dgAppointments.TabIndex = 7;
             // 
             // buttonAddAppointment
             // 
@@ -139,19 +137,62 @@
             this.buttonCancelAppointment.UseVisualStyleBackColor = true;
             this.buttonCancelAppointment.Click += new System.EventHandler(this.ButtonCancelAppointment_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(17, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(209, 24);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Appointment Scheduler";
+            // 
+            // buttonReports
+            // 
+            this.buttonReports.Location = new System.Drawing.Point(251, 356);
+            this.buttonReports.Name = "buttonReports";
+            this.buttonReports.Size = new System.Drawing.Size(93, 34);
+            this.buttonReports.TabIndex = 11;
+            this.buttonReports.Text = "Reports";
+            this.buttonReports.UseVisualStyleBackColor = true;
+            this.buttonReports.Click += new System.EventHandler(this.ButtonReports_Click);
+            // 
+            // buttonExit
+            // 
+            this.buttonExit.Location = new System.Drawing.Point(695, 356);
+            this.buttonExit.Name = "buttonExit";
+            this.buttonExit.Size = new System.Drawing.Size(93, 34);
+            this.buttonExit.TabIndex = 12;
+            this.buttonExit.Text = "E&xit";
+            this.buttonExit.UseVisualStyleBackColor = true;
+            this.buttonExit.Click += new System.EventHandler(this.ButtonExit_Click);
+            // 
+            // dgAppointments
+            // 
+            this.dgAppointments.AllowUserToAddRows = false;
+            this.dgAppointments.AllowUserToDeleteRows = false;
+            this.dgAppointments.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgAppointments.Location = new System.Drawing.Point(251, 12);
+            this.dgAppointments.Name = "dgAppointments";
+            this.dgAppointments.Size = new System.Drawing.Size(537, 335);
+            this.dgAppointments.TabIndex = 7;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 394);
+            this.Controls.Add(this.buttonExit);
+            this.Controls.Add(this.buttonReports);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonCancelAppointment);
             this.Controls.Add(this.buttonEditAppointment);
             this.Controls.Add(this.buttonAddAppointment);
             this.Controls.Add(this.dgAppointments);
             this.Controls.Add(this.radioWeekly);
-            this.Controls.Add(this.radioDaily);
+            this.Controls.Add(this.radioMonthly);
             this.Controls.Add(this.buttonDeleteCustomer);
-            this.Controls.Add(this.monthCalendar1);
+            this.Controls.Add(this.mainCalendar);
             this.Controls.Add(this.buttonEditCustomer);
             this.Controls.Add(this.buttonAddCustomer);
             this.Name = "MainForm";
@@ -167,13 +208,16 @@
         #endregion
         private System.Windows.Forms.Button buttonAddCustomer;
         private System.Windows.Forms.Button buttonEditCustomer;
-        private System.Windows.Forms.MonthCalendar monthCalendar1;
+        private System.Windows.Forms.MonthCalendar mainCalendar;
         private System.Windows.Forms.Button buttonDeleteCustomer;
-        private System.Windows.Forms.RadioButton radioDaily;
+        private System.Windows.Forms.RadioButton radioMonthly;
         private System.Windows.Forms.RadioButton radioWeekly;
-        private System.Windows.Forms.DataGridView dgAppointments;
         private System.Windows.Forms.Button buttonAddAppointment;
         private System.Windows.Forms.Button buttonEditAppointment;
         private System.Windows.Forms.Button buttonCancelAppointment;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button buttonReports;
+        private System.Windows.Forms.Button buttonExit;
+        private System.Windows.Forms.DataGridView dgAppointments;
     }
 }

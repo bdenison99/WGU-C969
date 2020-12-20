@@ -59,8 +59,7 @@ namespace BDenis3_C969_Project
                 };
                 editCustomer.PopulateCustomer(Convert.ToInt32(dgCustomerSearch.CurrentRow.Cells["customerId"].Value));
                 editCustomer.Show();
-                dgCustomerSearch.Refresh();
-                //dgCustomerSearch.DataSource = Dal.CustomerList.ToList<CustomerRecord>();
+                this.Close();
             }
             else
             {
@@ -82,6 +81,7 @@ namespace BDenis3_C969_Project
 
             foreach (DataGridViewRow cr in dgCustomerSearch.Rows)
             {
+                // if the customer name cell doesn't contain the search value, then hide the row
                 if (! cr.Cells["CustomerName"].Value.ToString().ToLower().Contains(textSearchValue.Text.ToString().ToLower()))
                 {
                     cr.Visible = false;

@@ -34,6 +34,7 @@
             this.buttonSearchAppt = new System.Windows.Forms.Button();
             this.textApptSearchValue = new System.Windows.Forms.TextBox();
             this.dgAppointments = new System.Windows.Forms.DataGridView();
+            this.buttonClearSearch = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgAppointments)).BeginInit();
             this.SuspendLayout();
             // 
@@ -81,22 +82,37 @@
             // 
             this.textApptSearchValue.Location = new System.Drawing.Point(284, 54);
             this.textApptSearchValue.Name = "textApptSearchValue";
-            this.textApptSearchValue.Size = new System.Drawing.Size(493, 20);
+            this.textApptSearchValue.Size = new System.Drawing.Size(363, 20);
             this.textApptSearchValue.TabIndex = 4;
             // 
             // dgAppointments
             // 
+            this.dgAppointments.AllowUserToAddRows = false;
+            this.dgAppointments.AllowUserToDeleteRows = false;
             this.dgAppointments.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgAppointments.Location = new System.Drawing.Point(17, 84);
+            this.dgAppointments.MultiSelect = false;
             this.dgAppointments.Name = "dgAppointments";
+            this.dgAppointments.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgAppointments.Size = new System.Drawing.Size(760, 354);
             this.dgAppointments.TabIndex = 5;
+            // 
+            // buttonClearSearch
+            // 
+            this.buttonClearSearch.Location = new System.Drawing.Point(653, 52);
+            this.buttonClearSearch.Name = "buttonClearSearch";
+            this.buttonClearSearch.Size = new System.Drawing.Size(124, 23);
+            this.buttonClearSearch.TabIndex = 6;
+            this.buttonClearSearch.Text = "Clear Search";
+            this.buttonClearSearch.UseVisualStyleBackColor = true;
+            this.buttonClearSearch.Click += new System.EventHandler(this.ButtonClearSearch_Click);
             // 
             // SearchAppointment
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.buttonClearSearch);
             this.Controls.Add(this.dgAppointments);
             this.Controls.Add(this.textApptSearchValue);
             this.Controls.Add(this.buttonSearchAppt);
@@ -105,6 +121,7 @@
             this.Controls.Add(this.label1);
             this.Name = "SearchAppointment";
             this.Text = "Search Appointments";
+            this.Load += new System.EventHandler(this.SearchAppointment_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgAppointments)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -119,5 +136,6 @@
         private System.Windows.Forms.Button buttonSearchAppt;
         private System.Windows.Forms.TextBox textApptSearchValue;
         private System.Windows.Forms.DataGridView dgAppointments;
+        private System.Windows.Forms.Button buttonClearSearch;
     }
 }

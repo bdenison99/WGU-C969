@@ -28,6 +28,7 @@ namespace BDenis3_C969_Project
         private static BindingList<CityRecord> cityList = new BindingList<CityRecord>();
         private static BindingList<CountryRecord> countryList = new BindingList<CountryRecord>();
 
+        // Property accessors for customer / address / city / country records
         public static BindingList<CustomerRecord> CustomerList { get { return customerList; } }
         public static BindingList<AddressRecord> AddressList { get { return addressList; } }
         public static BindingList<CityRecord> CityList { get { return cityList; } }
@@ -37,6 +38,7 @@ namespace BDenis3_C969_Project
         private static BindingList<AppointmentRecord> apptlist = new BindingList<AppointmentRecord>();
         public static BindingList<AppointmentRecord> Appointments { get { return apptlist; } }
 
+        // List of employee users which is helpful when assigning appointments to users
         private static BindingList<UserRecord> userlist = new BindingList<UserRecord>();
         public static BindingList<UserRecord> Users {  get { return userlist; } }
 
@@ -64,7 +66,7 @@ namespace BDenis3_C969_Project
             return results;
         }
 
-        // A general funtion to load data at runtime
+        // A general funtion to load data from the database into local copies
         public static void RetrieveData()
         {
             LoadCountryList();
@@ -210,14 +212,15 @@ namespace BDenis3_C969_Project
                     {
                         AppointmentID = Convert.ToInt32(row["appointmentId"].ToString()),
                         AppointmentCustomerID = Convert.ToInt32(row["customerId"].ToString()),
+                        AppointmentUserID = Convert.ToInt32(row["userId"].ToString()),
                         AppointmentTitle = row["title"].ToString(),
                         AppointmentDescription = row["description"].ToString(),
                         AppointmentLocation = row["location"].ToString(),
                         AppointmentContact = row["contact"].ToString(),
                         AppointmentType = row["type"].ToString(),
                         AppointmentUrl = row["url"].ToString(),
-                        AppointmentStartTime = DateTime.Parse(row["start"].ToString()).ToLocalTime(),  // This should take UTC time from the DB and convert it to local time
-                        AppointmentEndTime = DateTime.Parse(row["end"].ToString()).ToLocalTime() // Same here - UTC to local time
+                        AppointmentStartTime = DateTime.Parse(row["start"].ToString()), // ALL time stamps must be in UTC time - only convert to local time when displaying to a user
+                        AppointmentEndTime = DateTime.Parse(row["end"].ToString()) // ALL time stamps must be in UTC time - only convert to local time when displaying to a user
                     };
 
                     Dal.Appointments.Add(newAppt);
@@ -260,24 +263,27 @@ namespace BDenis3_C969_Project
             }
         }
 
-        // A function which 
-        public static void AddAppointment(int customerid, int userid, string title, string desc, string type, DateTime start, DateTime end)
+        // A function which adds a new appointment to the database, and creates a local appointment record
+        public static void AddAppointment(AppointmentRecord newAppt)
         {
-            //'2019-01-01 00:00:00'
+            DateTime start = newAppt.AppointmentStartTime;
+            DateTime end = newAppt.AppointmentEndTime;
+            // MySQL datetime format is this: '2019-01-01 00:00:00' - Since DateTime in the .NET framework is different, format the string using date elements
             string startString = $"{start.Year}-{start.Month}-{start.Day} {start.Hour}:{start.Minute}:{start.Second}" ;
             string endString = $"{end.Year}-{end.Month}-{end.Day} {end.Hour}:{end.Minute}:{end.Second}";
 
             int appointmentid = -1;
             string sqlAdd = $"INSERT INTO appointment (";
             sqlAdd += $"customerId, userId, title, description, location, contact, type, url, start, end, createDate, createdBy, lastUpdateBy) ";
-            sqlAdd += $"VALUES ({customerid}, {userid}, '{title}', '{desc}', 'not needed', 'not needed', '{type}', 'not needed', ";
+            sqlAdd += $"VALUES ({newAppt.AppointmentCustomerID}, {newAppt.AppointmentUserID}, '{newAppt.AppointmentTitle}', '{newAppt.AppointmentDescription}', 'not needed', 'not needed', '{newAppt.AppointmentType}', 'not needed', ";
             sqlAdd += $"'{startString}', '{endString}', UTC_TImestamp(), '{currentusername}', '{currentusername}');";
 
             Dal.RunSQLCommand(sqlAdd);
 
+            // Get the appointment ID from the recently added record
             try
             {
-                string sqlGet = $"SELECT * FROM appointment WHERE title = '{title}' and description = '{desc}' and start = '{startString}' and customerId = {customerid};";
+                string sqlGet = $"SELECT * FROM appointment WHERE title = '{newAppt.AppointmentTitle}' and description = '{newAppt.AppointmentDescription}' and start = '{startString}' and customerId = {newAppt.AppointmentCustomerID};";
                 DataTable dt = Dal.RunSQLCommand(sqlGet);
 
                 if (dt.Rows.Count == 1)
@@ -294,24 +300,10 @@ namespace BDenis3_C969_Project
 
             }
 
+            // Create a new appointment record and add it to the collection
             if (appointmentid != -1)
             {
-                AppointmentRecord newAppointment = new AppointmentRecord
-                {
-                    AppointmentID = appointmentid,
-                    AppointmentCustomerID = customerid,
-                    AppointmentUserID = userid,
-                    AppointmentTitle = title,
-                    AppointmentDescription = desc,
-                    AppointmentLocation = "not needed",
-                    AppointmentContact = "not needed",
-                    AppointmentType = type,
-                    AppointmentUrl = "not needed",
-                    AppointmentStartTime = Convert.ToDateTime(start),
-                    AppointmentEndTime = Convert.ToDateTime(end)
-                };
-
-                Appointments.Add(newAppointment);
+                Appointments.Add(newAppt);
             }
         }
 
@@ -384,7 +376,7 @@ namespace BDenis3_C969_Project
                 CityList.Add(newCityRecord);
             }
 
-            return countryid;
+            return cityid;
         }
 
         // A more complex function that accepts an address with up two 2 street address fields, and fields for a city ID, zip code, and phone number
@@ -449,11 +441,6 @@ namespace BDenis3_C969_Project
         // A function updates a customer record instead of creating a new one
         public static void UpdateCustomer(CustomerRecord customer, AddressRecord address, CityRecord city, CountryRecord country)
         {
-            // These are the records updated to match the country and city IDs using the names shown in the parameter records
-            CountryRecord newCountry = CompareCountry(country);  // adds the country if it doesn't exist
-            CityRecord newCity = CompareCity(city, newCountry.CountryID); // adds the city if it doesn't exist
-            AddressRecord newAddress = CompareAddress(address, newCity.CityID);  // does NOT add a new address since each addressID should be unique to each client, even if the clients live together it's just duplicate data
-
             // Theory of operations
             // Order of updates - Country, City, Address, Customer
             // A country can be added (via compareCountry function) but shouldn't need to be updated.  A country name change is rare enough that a SQL DB update command can be used outside of the application
@@ -462,18 +449,18 @@ namespace BDenis3_C969_Project
             // The customer updates last - only the customer Name and active flag can be changed
 
             string sqlUpdateCity = $"UPDATE city ";
-            sqlUpdateCity += $"SET city = '{newCity.CityName}', ";
-            sqlUpdateCity += $"countryId = {newCity.CountryID} ";
-            sqlUpdateCity += $"WHERE = cityId = {newCity.CityID};";
+            sqlUpdateCity += $"SET city = '{city.CityName}', ";
+            sqlUpdateCity += $"countryId = {city.CountryID} ";
+            sqlUpdateCity += $"WHERE = cityId = {city.CityID};";
             Dal.RunSQLCommand(sqlUpdateCity);
 
             string sqlUpdateAddress = $"UPDATE address ";
-            sqlUpdateAddress += $"SET address = '{newAddress.Address1}', ";
-            sqlUpdateAddress += $"address2 = '{newAddress.Address2}', ";
-            sqlUpdateAddress += $"cityId = {newAddress.CityID}, ";
-            sqlUpdateAddress += $"postalCode = '{newAddress.PostalCode}', ";
-            sqlUpdateAddress += $"phone = '{newAddress.Phone}' ";
-            sqlUpdateAddress += $"WHERE addressId = {newAddress.AddressID}; ";
+            sqlUpdateAddress += $"SET address = '{address.Address1}', ";
+            sqlUpdateAddress += $"address2 = '{address.Address2}', ";
+            sqlUpdateAddress += $"cityId = {address.CityID}, ";
+            sqlUpdateAddress += $"postalCode = '{address.PostalCode}', ";
+            sqlUpdateAddress += $"phone = '{address.Phone}' ";
+            sqlUpdateAddress += $"WHERE addressId = {address.AddressID}; ";
             Dal.RunSQLCommand(sqlUpdateAddress);
 
             string sqlUpdateCustomer = $"UPDATE customer ";
@@ -484,92 +471,32 @@ namespace BDenis3_C969_Project
 
         }
 
-        private static CountryRecord CompareCountry(CountryRecord cr)
+        // a function to update an appointment record
+        public static void UpdateAppointment(AppointmentRecord ar)
         {
-            // This function takes in a CountryRecord, and compares it to the database copy of the data.
-            // If the country name in the CountryRecord does not match the database, then the following happens
-            // Find out if there is a country name in the database for the name provided in the CountryRecord parameter
-            // Update the CountryRecord parameter to have the correct country ID and name and return that to the calling function
+            // MySQL datetime format is this: '2019-01-01 00:00:00' - Since DateTime in the .NET framework is different, format the string using date elements
+            string startString = $"{ar.AppointmentStartTime.Year}-{ar.AppointmentStartTime.Month}-{ar.AppointmentStartTime.Day} {ar.AppointmentStartTime.Hour}:{ar.AppointmentStartTime.Minute}:{ar.AppointmentStartTime.Second}";
+            string endString = $"{ar.AppointmentEndTime.Year}-{ar.AppointmentEndTime.Month}-{ar.AppointmentEndTime.Day} {ar.AppointmentEndTime.Hour}:{ar.AppointmentEndTime.Minute}:{ar.AppointmentEndTime.Second}";
 
-            // Get the row in the country table which matches the country NAME in the internal CountryRecord variable
-            string checkCountrySQL = $"SELECT * from country WHERE country = '{cr.CountryName}';";
-            DataTable dtCountryDB = Dal.RunSQLCommand(checkCountrySQL);
+            string sqlUpdateAppt = $"UPDATE appointment ";
+            sqlUpdateAppt += $"SET customerid = {ar.AppointmentCustomerID}, ";
+            sqlUpdateAppt += $"userid = {ar.AppointmentUserID}, ";
+            sqlUpdateAppt += $"title = '{ar.AppointmentTitle}', ";
+            sqlUpdateAppt += $"description = '{ar.AppointmentDescription}', ";
+            sqlUpdateAppt += $"location = 'not needed', ";
+            sqlUpdateAppt += $"contact = 'not needed', ";
+            sqlUpdateAppt += $"type = '{ar.AppointmentType}', ";
+            sqlUpdateAppt += $"url = 'not needed', ";
+            sqlUpdateAppt += $"start = '{startString}', ";
+            sqlUpdateAppt += $"end = '{endString}', ";
+            sqlUpdateAppt += $"lastUpdate = UTC_Timestamp(), ";
+            sqlUpdateAppt += $"lastUpdateBy = '{currentusername}' ";
+            sqlUpdateAppt += $"WHERE appointmentid = {ar.AppointmentID};";
 
-            // A row count of 0 means that the country name isn't in the database already - needs to be added
-            if (dtCountryDB.Rows.Count == 0)
-            {
-                string addCountrySQL = $"INSERT into country (country, createDate, createdBy, lastUpdateBy) ";
-                addCountrySQL += $"VALUES ('{cr.CountryName}', UTC_Timestamp(), '{CurrentUsername}', '{CurrentUsername}');";
-                Dal.RunSQLCommand(addCountrySQL);  // Query again now that we have added the new country record
-                dtCountryDB = Dal.RunSQLCommand(checkCountrySQL); // get the countryID results
-                cr.CountryID = Convert.ToInt32(dtCountryDB.Rows[0]["countryId"].ToString()); // store the correct country id
-            }
-            else
-            {
-                // A non-zero row returned means a country was found with a matching name, now compare to the current country ID
-                if (cr.CountryID != Convert.ToInt32(dtCountryDB.Rows[0]["countryId"].ToString()))
-                {
-                    // if the current country ID doesn't match the one retrieved from the database for the current name, then update the ID
-                    cr.CountryID = Convert.ToInt32(dtCountryDB.Rows[0]["countryId"].ToString());
-                }
-            }
-
-            return cr;
+            Dal.RunSQLCommand(sqlUpdateAppt);
         }
 
-        private static CityRecord CompareCity(CityRecord cr, int countryid)
-        {
-            // This function takes in a CityRecord, and compares it to the database copy of the data.
-            // If the country name in the CityRecord does not match the database, then the following happens
-            // Find out if there is a country name in the database for the name provided in the CityRecord parameter
-            // Update the CityRecord parameter to have the correct country ID and name and return that to the calling function
-
-            // Get the row in the country table which matches the country NAME in the internal CityRecord variable
-            string checkCitySQL = $"SELECT * from city WHERE city = '{cr.CityName}';";
-            DataTable dtCityDB = Dal.RunSQLCommand(checkCitySQL);
-
-            // A row count of 0 means that the city name isn't in the database already - needs to be added
-            if (dtCityDB.Rows.Count == 0)
-            {
-                string addCitySQL = $"INSERT into city (city, countryId, createDate, createdBy, lastUpdateBy) ";
-                addCitySQL += $"VALUES ('{cr.CityName}', {countryid}, UTC_Timestamp(), '{CurrentUsername}', '{CurrentUsername}');";
-                Dal.RunSQLCommand(addCitySQL);  // Query again now that we have added the new city record
-                dtCityDB = Dal.RunSQLCommand(checkCitySQL); // get the cityID results - should never fail
-                cr.CityID = Convert.ToInt32(dtCityDB.Rows[0]["cityId"].ToString()); // store the correct city id
-                cr.CountryID = countryid; // This should come from the country record which is the first to be updated
-            }
-            else
-            {
-                // This should trigger only when a city name already exists for the updated customer city
-                if (cr.CityID != Convert.ToInt32(dtCityDB.Rows[0]["cityId"].ToString()))
-                {
-                    // This makes sure that we have the correct city ID for the city name
-                    cr.CountryID = Convert.ToInt32(dtCityDB.Rows[0]["cityId"].ToString());
-                }
-            }
-
-            return cr;
-        }
-
-        private static AddressRecord CompareAddress(AddressRecord ar, int cityid)
-        {
-            // This function takes in a AddressRecord, and compares it to the database copy of the data.
-            // If the address in the AddressRecord does not match the database, then the following happens
-            // update the city id using the one just passed in
-            // Update the CityRecord parameter to have the correct country ID and name and return that to the calling function
-
-            // Get the row in the country table which matches the country NAME in the internal CityRecord variable
-            string checkAddressSQL = $"SELECT * from address WHERE addressId = '{ar.AddressID}';";
-            DataTable dtAddressDB = Dal.RunSQLCommand(checkAddressSQL);
-
-            // There should never be a case where a customer update process doesn't have a matching address id, so just move on to validating the city ID
-            if (Convert.ToInt32(dtAddressDB.Rows[0]["cityId"]) != Convert.ToInt32(ar.CityID))
-            {
-                ar.CityID = Convert.ToInt32(dtAddressDB.Rows[0]["cityId"]);
-            }
-            return ar;
-        }
-
+        // A function to delete a customer record by marking it as inactive (setting active bit to false) in the database and local cache
         public static bool DeleteCustomer(int customerID)
         {
             // The database schema does not allow a delete of a customer or address record 
@@ -592,6 +519,36 @@ namespace BDenis3_C969_Project
 
                 }
             }
+            return deleted;
+        }
+
+        // a function to delete an appointment
+        public static bool DeleteAppointment(int appointmentid)
+        {
+            bool deleted = true;
+            int idx = -1;
+
+            // Remove the local copy
+            foreach (AppointmentRecord ar in Appointments)
+            {
+                if (ar.AppointmentID == appointmentid)
+                {
+                    idx = Appointments.IndexOf(ar);
+                }
+            }
+            Appointments.RemoveAt(idx);
+
+            // Remove the DB copy
+            string deleteAppt = $"DELETE from appointment where appointmentid = {appointmentid};";
+            Dal.RunSQLCommand(deleteAppt);
+
+            string validateDelete = $"SELECT * from appointment where appointmentid = {appointmentid};";
+            DataTable results = Dal.RunSQLCommand(validateDelete);
+            if (results.Rows.Count != 0)
+            {
+                deleted = false;
+            }
+
             return deleted;
         }
     }

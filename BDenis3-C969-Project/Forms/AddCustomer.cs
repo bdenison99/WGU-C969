@@ -13,7 +13,8 @@ namespace BDenis3_C969_Project
 {
     public partial class AddCustomer : Form
     {
-        private bool needsUpdate = false;  // a flag to indicate that at least one field on the form changed contents
+        public bool isUpdate = false;       // a flag to indicate that this is an update operation on an existing customer and not a net new customer
+        private bool needsUpdate = false;   // a flag to indicate that at least one field on the form changed contents while in update mode
         // These records are used only for updating an existing customer and shouldn't be used for adding a new customer
         private CustomerRecord customer = new CustomerRecord();
         private AddressRecord address = new AddressRecord();
@@ -32,7 +33,7 @@ namespace BDenis3_C969_Project
 
         private void ButtonSaveNewCustomer_Click(object sender, EventArgs e)
         {
-            if (this.isUpdate)
+            if (isUpdate)
             {
                 UpdateCustomer();
             }
@@ -48,17 +49,52 @@ namespace BDenis3_C969_Project
             {
                 if (ValidateFields())
                 {
-                    customer.CustomerName = textCustomerName.Text.ToString();
-                    customer.Active = Convert.ToBoolean(checkActiveCustomer.Checked);
+                    bool countryFound = false;
+                    bool cityFound = false;
+                    // Need to handle country updates first - especially if a new country is added since a city may need to be modified to use that country.  Country names are compared as lower case strings
+                    foreach (CountryRecord cr in Dal.CountryList.ToList<CountryRecord>())
+                    {
+                        if (cr.CountryName.ToLower() == textCountryName.Text.ToLower())
+                        {
+                            country = cr;  // set the country record to the current record
+                            countryFound = true;
+                        }
+                    }
 
+                    if (countryFound == false)
+                    {
+                        int newcountryid = Dal.AddCountry(textCountryName.Text.ToString());
+                        country = Dal.CountryList.ToList<CountryRecord>().Find(item => item.CountryID == newcountryid); // A Linq Lambda to find the new country record
+                    }
+
+                    // This handles city names changing on a customer record.  New cities can be added by changing the name to something that doesn't exist.  Comparison is lower-case only.
+                    foreach (CityRecord cr in Dal.CityList.ToList<CityRecord>())
+                    {
+                        if (cr.CityName.ToLower() == textCityName.Text.ToLower())
+                        {
+                            city = cr;  // set the city record to the one that matches the textbox
+                            countryFound = true;
+                        }
+                    }
+
+                    if (cityFound == false)                   
+                    {
+                        int newcityid = Dal.AddCity(textCityName.Text.ToString(), country.CountryID);
+                        city = Dal.CityList.ToList<CityRecord>().Find(item => item.CityID == newcityid); // This should also make sure that the city record points to the correct country
+                    }
+
+
+                    // the address record is the top of the chain of linked tables for a full address
                     address.Address1 = textStreetAddress.Text.ToString();
                     address.Address2 = textStreetAddress2.Text.ToString();
                     address.Phone = textPhone.Text.ToString();
                     address.PostalCode = textPostalCode.Text.ToString();
-                    // Need to test city ID lookup if customer changes city
-                    address.CityID = (Dal.CityList.ToList<CityRecord>().Find(item => item.CityName.ToString().ToLower() == textCityName.Text.ToString().ToLower())).CityID;
+                    address.CityID = city.CityID;
 
-                    Dal.UpdateCustomer(customer, address, city, country);
+                    customer.CustomerName = textCustomerName.Text.ToString();
+                    customer.Active = Convert.ToBoolean(checkActiveCustomer.Checked);
+
+                    Dal.UpdateCustomer(customer, address, city, country);  // Have the data access layer do the updates
                     this.Close();
                 }
                 else
@@ -190,6 +226,7 @@ namespace BDenis3_C969_Project
             textCountryName.Text = country.CountryName.ToString();
             textPostalCode.Text = address.PostalCode.ToString();
             textPhone.Text = address.Phone.ToString();
+            checkActiveCustomer.Checked = customer.Active ? true : false;
         }
 
         private void FieldChanged(object sender, EventArgs e)

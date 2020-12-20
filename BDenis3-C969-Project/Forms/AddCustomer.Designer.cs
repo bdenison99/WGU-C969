@@ -270,6 +270,6 @@
         private System.Windows.Forms.Button buttonSaveNewCustomer;
         private System.Windows.Forms.Label labelPhone;
         private System.Windows.Forms.TextBox textPhone;
-        public bool isUpdate = false;
+
     }
 }

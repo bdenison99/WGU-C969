@@ -41,9 +41,19 @@ namespace BDenis3_C969_Project
 
         private void ButtonLogin_Click(object sender, EventArgs e)
         {
+            ProcessLogin();
+        }
+
+        private void ButtonLogin_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            ProcessLogin();
+        }
+
+        private void ProcessLogin()
+        {
             // Make sure that the user provided a username and password - if they didn't throw a messagebox and stop processing.
             if (textboxUsername.Text.Length == 0 || textboxPassword.Text.Length == 0)
-            {                
+            {
                 MessageBox.Show(rm.GetString("MissingUsernameOrPassword", CultureInfo.CurrentCulture));
             }
             else
@@ -52,7 +62,7 @@ namespace BDenis3_C969_Project
                 Dal DataLayer = new Dal();
 
                 DataTable userinfo = Dal.RunSQLCommand("SELECT * FROM user WHERE UserNAME ='" + textboxUsername.Text.ToLower() + "'");
-                
+
                 // If the number of rows returned is 0, the database doesn't know about this user, throw an invalid login message
                 if (userinfo.Rows.Count == 0)
                 {
@@ -66,10 +76,10 @@ namespace BDenis3_C969_Project
                 else
                 {
                     // Check the password in the database against the one provided by the user
-                    if (userinfo.Rows[0]["password"].ToString() != textboxPassword.Text.ToString() )
+                    if (userinfo.Rows[0]["password"].ToString() != textboxPassword.Text.ToString())
                     {
                         // if it doesn't match, display a login error about bad username or password - don't want to give away which one was wrong for security reasons 
-                        MessageBox.Show(rm.GetString("LoginErrorString",CultureInfo.CurrentCulture));
+                        MessageBox.Show(rm.GetString("LoginErrorString", CultureInfo.CurrentCulture));
                     }
                     else
                     {

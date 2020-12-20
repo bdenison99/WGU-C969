@@ -42,11 +42,10 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.dtpStopTime = new System.Windows.Forms.DateTimePicker();
-            this.dtpAppointmentDate = new System.Windows.Forms.DateTimePicker();
-            this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.textApptType = new System.Windows.Forms.TextBox();
+            this.textAppointmentID = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // buttonCancelApptAdd
@@ -141,8 +140,8 @@
             // 
             // dtpStartTime
             // 
-            this.dtpStartTime.CustomFormat = "MM/dd/yyyy hh:mm:ss";
-            this.dtpStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            this.dtpStartTime.CustomFormat = "MM/dd/yyyy hh:mm tt";
+            this.dtpStartTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpStartTime.Location = new System.Drawing.Point(122, 265);
             this.dtpStartTime.Name = "dtpStartTime";
             this.dtpStartTime.Size = new System.Drawing.Size(376, 20);
@@ -168,30 +167,12 @@
             // 
             // dtpStopTime
             // 
-            this.dtpStopTime.CustomFormat = "MM/dd/yyyy hh:mm:ss";
-            this.dtpStopTime.Format = System.Windows.Forms.DateTimePickerFormat.Time;
+            this.dtpStopTime.CustomFormat = "MM/dd/yyyy hh:mm tt";
+            this.dtpStopTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpStopTime.Location = new System.Drawing.Point(122, 293);
             this.dtpStopTime.Name = "dtpStopTime";
             this.dtpStopTime.Size = new System.Drawing.Size(376, 20);
             this.dtpStopTime.TabIndex = 8;
-            // 
-            // dtpAppointmentDate
-            // 
-            this.dtpAppointmentDate.CustomFormat = "MM/dd/yyyy";
-            this.dtpAppointmentDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpAppointmentDate.Location = new System.Drawing.Point(122, 239);
-            this.dtpAppointmentDate.Name = "dtpAppointmentDate";
-            this.dtpAppointmentDate.Size = new System.Drawing.Size(376, 20);
-            this.dtpAppointmentDate.TabIndex = 6;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(13, 245);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(30, 13);
-            this.label7.TabIndex = 0;
-            this.label7.Text = "Date";
             // 
             // label8
             // 
@@ -219,19 +200,26 @@
             this.textApptType.Size = new System.Drawing.Size(376, 20);
             this.textApptType.TabIndex = 5;
             // 
+            // textAppointmentID
+            // 
+            this.textAppointmentID.Enabled = false;
+            this.textAppointmentID.Location = new System.Drawing.Point(400, 11);
+            this.textAppointmentID.Name = "textAppointmentID";
+            this.textAppointmentID.Size = new System.Drawing.Size(97, 20);
+            this.textAppointmentID.TabIndex = 12;
+            // 
             // AddAppointment
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(510, 356);
+            this.Controls.Add(this.textAppointmentID);
             this.Controls.Add(this.textApptType);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.dtpStopTime);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.label7);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.dtpAppointmentDate);
             this.Controls.Add(this.dtpStartTime);
             this.Controls.Add(this.textApptDescription);
             this.Controls.Add(this.label4);
@@ -267,10 +255,9 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.DateTimePicker dtpStopTime;
-        private System.Windows.Forms.DateTimePicker dtpAppointmentDate;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox textApptType;
+        public System.Windows.Forms.TextBox textAppointmentID;
     }
 }

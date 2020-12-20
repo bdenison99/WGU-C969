@@ -98,6 +98,7 @@
             this.buttonLogin.Text = "button1";
             this.buttonLogin.UseVisualStyleBackColor = true;
             this.buttonLogin.Click += new System.EventHandler(this.ButtonLogin_Click);
+            this.buttonLogin.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ButtonLogin_KeyPress);
             // 
             // Login
             // 
